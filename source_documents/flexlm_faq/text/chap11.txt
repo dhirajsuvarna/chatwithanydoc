@@ -1,0 +1,34 @@
+Table of Contents * Previous Chapter * Next Chapter
+
+Q11. End-User Options File
+Please refer to the End-User manual for a general discussion of the End-User Options file. Only exceptional or undocumented questions are answered here.
+
+
+Q11.1 How do I enable the Options file?
+Add a path to your Options file to the DAEMON line in the license file:
+
+Before: DAEMON demo /usr/flexlm/demo
+
+After: DAEMON demo /usr/flexlm/demo /usr/flexlm/options
+
+
+Q11.2 Why doesn't TIMEOUT work?
+TIMEOUT only works if the application developer specifically supports it. By default, it doesn't work. Often, it's a difficult feature to support, since the application has to determine when it's `idle', and this is sometimes non-trivial to determine.
+
+
+Q11.3 Is the Options GROUP the same as a Unix group (/etc/groups)?
+No. GROUPs are defined in the Options file, and are unrelated to Unix groups.
+
+
+Q11.4 I need to have more users in a GROUP - how can I get around the 240 character limitation?
+Upgrade to v4.0 vendor daemons. They support '\' line continuation character, and a GROUP line of up to 2K.
+
+
+Q11.5 I need a GROUP of hosts, not users.
+Upgrade to v4.0 vendor daemons, where HOST_GROUP is supported.
+
+
+Q11.6 What is REPORTLOG for?
+It's used by FLEXadmin to give an accurate report of historical usage. It's not intended for any other use.
+
+Table of Contents * Previous Chapter * Next Chapter

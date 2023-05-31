@@ -1,0 +1,34 @@
+Table of Contents * Previous Chapter * Next Chapter
+
+Q2. License File Locations
+Q2.1 My application can't seem to find the license file. What do I do?
+Applications find the license file in one of 3 places:
+
+A location specified in the application by the vendor. See the application manual for this location.
+$LM_LICENSE_FILE (including VMS and Windows/NT). This can also be a colon-separated list (like $PATH) of license files, so that this environment variable can be set once for all applications.
+the default FLEXlm license location: /usr/local/flexlm/licenses/license.dat
+With v4.0+ applications (available spring-1995), a new feature, the License Finder, can also be used in place of $LM_LICENSE_FILE. See the FLEXlm End-Users or Programmers Manual for more details on this.
+
+
+Q2.2 lmstat doesn't report all the features in my license file. Why?
+Here's the possibilities:
+
+$LM_LICENSE_FILE is set to the wrong file.
+lmstat only reports the first file in the $LM_LICENSE_FILE colon-separated list. Use lmstat -c to report on each file separately.
+lmstat doesn't report on `uncounted' features. These are features with a `number of licenses' field set to '0'. `Number of licenses' is the 6th item on a FEATURE line (after the expiration date). There's nothing to report on uncounted features. NOTE: v5 of FLEXlm will provide the option of having servers service `uncounted' features, in which case lmstat will report these also.
+Q2.3 I've received FLEXlm license files from 2 different companies. Do I have to combine them?
+You don't have to combine license files. Each license file that has any `counted' lines (the `number of licenses' field is >0) requires a server. It's perfectly OK to have any number of separate license files, with different lmgrd server processes supporting each file. Moreover, since lmgrd is a lightweight process, for sites without system administrators, this is often the simplest (and therefore recommended) way to proceed.
+
+
+Q2.4 I want to combine license files. How do I do it?
+Only license files with identical hostids on the SERVER line can be combined. Note that license files may refer to the same host using different hostids, particularly on hp700, where one file may use ethernet hostid, and another uname -i. In this case these license files CANNOT be combined because the hostids are not identical.
+
+If the hostids are identical, concatenate the 2 files, and then remove identical SERVER lines, so there's only one (or three for redundant servers) SERVER line(s). It's then strongly recommended that symbolic links be made from the new, merged file to the old file locations. That way, the applications will be able to find the newly merged file without having to change anything.
+
+Finally, make sure you use the latest version of lmgrd on the merged file. The FLEXlm version of lmgrd MUST be >= the FLEXlm version of the vendor daemon (noted on the DAEMON line). Use lmver to determine the FLEXlm version of the vendor daemon or lmgrd. (The patch letters at the end of the version are not significant when comparing versions for this purpose.)
+
+
+Q2.5 When is it recommended to combine license files?
+Many system administrators, especially for larger sites, prefer to combine license files to ease administration of FLEXlm licenses. It's purely a matter of preference.
+
+Table of Contents * Previous Chapter * Next Chapter

@@ -1,0 +1,71 @@
+Table of Contents * Previous Chapter * Next Chapter
+
+Q7. Redundant Servers
+Q7.1 What are FLEXlm redundant servers?
+There's 2 kind of redundancy available through FLEXlm: true redundant servers, and use of colon-separated list in $LM_LICENSE_FILE. To avoid confusion, only true redundant servers are addressed here.
+
+Redundant servers are a set of 3 nodes designated to serve the same license file. The license file has 3 SERVER lines. lmgrd is started on all 3 nodes. One of the servers starts out as the master server and serves licenses. If the master goes down, another server takes over as master. Redundant servers require a quorum of 2 servers to be up, or no licenses are served.
+
+
+Q7.2 How do I start up redundant servers? Is there a time-limit for starting all the servers?
+There is no time limit. Simply start the servers as convenient. The first server started of the first 2 listed in the license file becomes the master. For example,
+
+SERVER node1 12345678 2937
+SERVER node2 55489789 2937
+SERVER node3 87564543 2937
+The first to start of node1 or node2 becomes the master. node3 is never the master - it's there only to maintain quorum.
+
+
+Q7.3 Why is a quorum of 2 servers required?
+Without a quorum, you could easily steal licenses. Here's how: request licenses from redundant servers for 3 nodes each of which are on separate networks. Start each of the 3 nodes. If quorum is not required, they'll each become master, and 3 times the number of licenses purchased will be available. With quorum, this is impossible.
+
+
+Q7.4 When are redundant servers recommended?
+For mission critical applications where there's a system administrator available. A good example is a Wall Street trading floor, where a lost server can mean a lost trade.
+
+The reason an administrator is recommended is the following: since a quorum of 2 servers is required, when one server goes down, there are suddenly 2 points of failure. That is, with 2 servers up, if EITHER goes down, licenses are denied. In this state, the mathematical reliability of the system is twice as bad as it would be WITHOUT redundant servers, where only one of those 2 nodes would cause failure. Therefore, it's the administrators job to detect when any of the 3 servers are down, and bring it back up as soon as possible. This job is made easier with FLEXadmin, where detection is automatic.
+
+
+Q7.5 When are redundant servers discouraged?
+At sites without system administrators.
+When the software relies on a single host. In this case, there's a single point of failure, and redundant FLEXlm servers only complicates administration and does not add any redundancy to the overall system.
+Q7.6 Is it OK to NFS-mount license files when using redundant servers?
+If the license file is located only on one node, the redundancy is being defeated. That is, there's a single point of failure, and the redundant servers only complicate administration.
+
+
+Q7.7 How can the colon-separated list in $LM_LICENSE_FILE be used for redundancy?
+Suppose a customer wants 20 licenses for feature 'f1'. The license distributor can ship 2 license files for 10 licenses each of 'f1', each with one SERVER line, for 2 different hostids.
+
+For example:
+
+File 1:
+
+SERVER node1 12345678 2837
+DAEMON demo /usr/local/flexlm/demo
+FEATURE f1...
+File 2:
+
+SERVER node2 87654321 2837
+DAEMON demo /usr/local/flexlm/demo
+FEATURE f1...
+The user sets LM_LICENSE_FILE to file1:file2 (or 2837@node1:2837@node2). When a checkout for f1 is attempted it first attempts a checkout from node1. If this fails for any reason, a checkout is attempted from node2.
+
+For PC:
+
+Use `,' (comma) instead of `:' to separate license paths. As of v5 (available Q1, 1996), the comma will change to `;' (semi-colon).
+
+
+Q7.8 Are there any drawbacks to using the colon-separated list for redundancy?
+Yes. By default, once an application has successfully checked out a license from one host, all subsequent checkouts must be satisfied from the same host. If the application requires more than one FEATURE, then this could result in a license denial when the license may be available on another server. An application can bypass this restriction with the use of multiple FLEXlm `license jobs', but in practice, few applications do at this time.
+
+If the application supports license queueing, all licenses are only queued from the first host on the list.
+
+
+Q7.9 When is it recommended to use colon-separated list for redundancy rather than true redundant servers?
+When there's less system administration available to monitor license servers, and when the applications are not mission- critical. The colon-separated list has some other advantages: it's more forgiving if you lose quorum; it's not limited to 3 servers (any number will work); and for wide-area networks, you can make servers available locally, with remote servers available as backup.
+
+
+Q7.10 I'm seeing the error messages `Mismatch Communications...' and lmgrd exits. Is there a fix?
+This is a bug in the v4.1 lmgrd and only occurs with vendor daemons that are v2.21 of FLEXlm, which are > 4 years old. A fixed lmgrd is available from your software vendor.
+
+Table of Contents * Previous Chapter * Next Chapter

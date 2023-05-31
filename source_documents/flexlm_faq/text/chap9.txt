@@ -1,0 +1,19 @@
+Table of Contents * Previous Chapter * Next Chapter
+
+Q9. Common Application Startup Problems
+Q9.1 Cannot find license file
+Most applications have a default location in their application directory hierarchy. You can override this with the LM_LICENSE_FILE environment variable. This problem can occur when this variable is set wrong, or the default location for the license is missing.
+
+
+Q9.2 No such feature exists
+The most common reason for this is that you're using the wrong license file, or an outdated copy of the file.
+
+
+Q9.3 Cannot connect to license server
+Usually this means the server isn't running. It can also mean the server is using a different copy of the license file, which has a different port number than the license file you're currently using indicates. You can use the lmdiag utility to more fully analyze this error.
+
+
+Q9.4 License server does not support this feature
+This means the server is using a different copy of the license file than the application. They should be synchronized. This error will also report `UNSUPPORTED' in the debug log file.
+
+Table of Contents * Previous Chapter * Next Chapter

@@ -4,6 +4,9 @@
 # Models
 models/
 
+# chainlit 
+.chainlit
+
 # Local Chroma db
 .chroma/
 db/

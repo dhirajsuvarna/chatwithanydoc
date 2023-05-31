@@ -1,0 +1,40 @@
+Table of Contents * Previous Chapter * Next Chapter
+
+Q8. Common Debug Log errors
+Q8.1 Retrying socket bind
+This means the TCP number is already in use port number. Almost always, this means the lmgrd is already running, and you've tried to start it twice. Sometimes (rarely) it means that another program is using this TCP port number. The number is listed on the SERVER line in the license file as the last item. You can change the number and restart lmgrd, but only do this if you don't already have an lmgrd running for this license file.
+
+
+Q8.2 License manager: can't initialize: Cannot find license file
+You've started lmgrd on a non-existent file. There's 2 ways to specify the file for lmgrd to use:
+
+-c license-file
+LM_LICENSE_FILE environment variable.
+In either case, the license specified doesn't exist.
+
+
+Q8.3 Invalid license key (inconsistent encryption code for `f1')
+This happens for 3 different reasons:
+
+The license file has been typed in incorrectly (cutting and pasting from email is a safe way to avoid this)
+The license was generated incorrectly. Your license supplier will have to generate a new license if this is the case.
+(Rare): The license vendor changed encryption seeds. This is actually an incorrectly generated license, but it may be because the company generating the licenses has, in effect, 2 different kinds of license generators. Again, only the license supplier can resolve this.
+Q8.4 MULTIPLE `vendor-daemon-name' servers running.
+There's 2 lmgrd and vendor-daemons running for this license file. Only one process per vendor-daemon/per node is allowed by FLEXlm to run. Sometimes this can happen because the lmgrd was killed with a -9 signal (which should not be done!). The lmgrd was then not able to bring the vendor-daemon process down, so it's still running, although not able to serve licenses. If an lmgrd is killed with a -9, the vendor-daemons also then must be killed with a -9 signal. In general, lmdown should be used. If kill is used, you should use kill without a -9 argument.
+
+
+Q8.5 Vendor daemon can't talk to lmgrd
+This means a pre-v3.0 lmgrd is being used with a v3.0+ vendor daemon. Simply use the latest version of lmgrd (MUST be a version equal to or greater than the vendor daemon version).
+
+(Rare): This can also happen if TCP networking doesn't function on the node where you're trying to run lmgrd.
+
+
+Q8.6 Vendor daemon died with status n...Since this is an unknown status, lmgrd will attempt to re-start the vendor daemon.
+Often this is accompanied by printing a port number which increases over and over.
+
+lmgrd tries to start the vendor daemon using the DAEMON line in the license file, which looks like:
+
+DAEMON demo /usr/bin/demo
+The /usr/bin/demo is a path to a binary, and there's something wrong with either the path or the binary itself. One way to debug this is to run vendor daemon directly, using this path, and problem then becomes more apparent.
+
+Table of Contents * Previous Chapter * Next Chapter

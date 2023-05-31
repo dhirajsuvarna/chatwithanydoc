@@ -1,0 +1,77 @@
+. 
+Table of Contents * Previous Chapter * Next Chapter
+
+Q10. FLEXlm utilities (lmutil - lmstat, etc.)
+PC NOTE: On all platforms, the utilities can be invoked with the lmutil command: lmutil lmstat, lmutil lmremove, etc. On the PC, this is the only way to access the utilities. So where you see, for example, the lmstat commend, read lmutil lmstat.
+
+
+Q10.1 How do I tell who's currently using a feature?
+Use lmstat. This is a utility shipped to vendors and intended for distribution to end-users.
+
+% lmstat -a -c `path-t o-license-file' 
+will list all the current information available from the server. Note that uncounted licenses are NOT reported by lmstat - only counted licenses.
+
+
+Q10.2 How do I see historical usage of a feature?
+Limited (and sometimes misleading) information about usage is found in the lmgrd log file. Correct usage information can be obtained using FLEXadmin's reporting capability.
+
+
+Q10.3 How do I tell what version of FLEXlm I'm using?
+Use the lmver utility. If you can't find an lmver, link or copy lmstat to lmver, and then it will work as lmver. (All the flexlm utilities are the same binary, and the name of the binary is used to determine behavior.)
+
+There are 3 components to FLEXlm: lmgrd, vendor daemon and application. Run lmver `path-to-component' and it will report the FLEXlm version.
+
+Alternately, you can use the Unix 'strings' command:
+
+strings component | grep Copy 
+where `component' is a binary, like lmgrd or vendor daemon or application.
+
+PC Note: The version is the name (and date) of the lmgrxxx.dll. Here's the PC lmgrxxx.dll versions:
+
+lmgr.dll
+16-bit v4.1
+lmgr32.dll
+32-bit v4.1
+lmgr164a.dll
+16-bit v4.1 patch release 6 (dated: October 1995) and v4.1b (dated: December 1995).
+lmgr324a.dll
+32-bit v4.1 patch release 6 (dated: October 1995) and v4.1b (dated: December 1995).
+lmgr165.dll
+16-bit v5.0 (Q1, 1996).
+lmgr325.dll
+32-bit v5.0 (Q1, 1996).
+Q10.4 lmstat sometimes skips features, why?
+This happens for 2 reasons:
+
+Uncounted features (number of licenses == 0) aren't shown by lmstat, since the number of users isn't relevant
+If an uncounted line has a daemon name of `none', there is a bug that lmstat will ignore subsequent counted features of the same name. To fix, simply change `none' to a valid daemon name.
+Q10.5 How do I tell if I've typed in the license file correctly?
+Use lmcksum (copy lmstat to lmcksum if you can't find lmcksum - See Q8.3). lmcksum -c `license-file'. If you have a v4.0+ license file, and the vendor has included `ck=nnn' on the FEATURE lines, lmcksum will simply report OK or BAD next to each FEATURE line. Otherwise, numbers are reported, and you can ask your supplier to run the same command on the original file, and compare numbers.
+
+
+Q10.6 Q8.5 I'm getting `Cannot Connect' errors. How do I determine what's wrong?
+Use the lmdiag utility. (If you can't find lmdiag, copy a v4.0+ version of lmstat to lmdiag, and you'll have it.) lmdiag will analyze the problem, and, if requested, determine if the problem is that the server is running on a different port than indicated in the license file.
+
+lmdiag also prints out a description of the license file in easily understandable English.
+
+In summary, lmdiag attempts a checkout of the feature, and if it fails, reports why.
+
+
+Q10.7 lmremove doesn't seem to work: after freeing a license, it becomes checked out shortly after. Why?
+That's because lmremove is not intended to free licenses. It has one purpose: when a client node crashes, the license is not freed immediately, and can sometimes take a full day to release the license. This is because when the node crashes the networking also fails.
+
+If you free a license with lmremove for an active process, the application will detect this shortly, and re-checkout the license.
+
+
+Q10.8 How do I prevent users at my site from being able to use lmdown?
+Get a copy of 4.0+ lmgrd, and start the server with the lmgrd -x lmdown switch. This disables the lmdown command.
+
+
+Q10.9 If I can't use lmdown, how do I shutdown the servers?
+Use kill, without a flag. DON'T use kill -9. If you use kill without a flag, the server is able to shutdown cleanly, the same, in fact, as if lmdown had been used.
+
+
+Q10.10 When I run lmdown on redundant servers, it doesn't seem to work. Why?
+With redundant servers, lmdown returns immediately, but the servers, after having received the request, wait one full minute before actually shutting down. (This is in order to avoid a race condition where a second server would attempt to re-establish quorum with the server that shut down.) Be patient, wait the minute, and you'll see it works.
+
+Table of Contents * Previous Chapter * Next Chapter

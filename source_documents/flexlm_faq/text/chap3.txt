@@ -1,0 +1,129 @@
+Table of Contents * Previous Chapter * Next Chapter
+
+Q3. License File Contents
+Q3.1 What are the components of a license file?
+The license file keywords are:
+
+SERVER
+
+DAEMON
+
+FEATURE
+
+INCREMENT
+
+UPGRADE
+
+PACKAGE
+
+Any line not beginning with a keyword is a comment.
+
+Following is a summary of these lines and their meaning. For a more complete description, please refer to the End-Users or Programmers Manual.
+
+SERVER
+This line is required if any FEATURE lines are `counted' (number of licenses > 0). This indicates 1) the hostname of the server (so the client applications will know which host to talk to), 2) the host's unique hostid, and 3) the `port' number the server is using. This `port' number is a unique address on that host. The combination of port number and hostname is a unique address, like a unique telephone number, so any process on that network can talk to the lmgrd server. The hostname and port number can be changed. The hostid CANNOT be changed, or the license is invalidated. If there are no `counted' FEATURE lines, this line is not needed, and is ignored if it's included.
+DAEMON
+This line is also required only if there are `counted' FEATUREs. This specifies the daemon's unique name, and the path to the vendor daemon binary. This path can be changed and often needs to be modified upon installation.
+FEATURE/INCREMENT/UPGRADE
+This is the heart of the license file, and lists what the user is licensed to use. These three keywords have nearly identical layouts and similar meaning.
+FEATURE
+There's 2 formats for a FEATURE line, pre-v3.0 and v3.0+. Both formats have the same first 7 fields. ALL versions of FLEXlm understand the pre-v3.0 format.
+Here's the first 7 fields:
+`FEATURE name daemon version exp-date #lic key'
+
+name
+feature name
+daemon
+The vendor's unique daemon name. Ties this feature to the appropriate DAEMON line.
+version
+Software version licensed. Any version of the software up to this version number is licensed. Later version numbers will be denied. Format is floating-point, e.g., nnn.nnn.
+exp-date
+License expires on this date. Format: ddd-mm-yy[yy], `1-mar-2002'. If the year is '0' the software never expires, e.g., 1-jan-0.
+#lic
+Number of licenses. Usually this refers to the number of concurrent users of the feature.
+key
+A 20-character hex key. Heart of the license file security, it's a checksum of the FEATURE line, and the hostid, and the vendor's encryption seeds. Guarantees the user cannot change most of the license file (hostname, port number, and daemon path can be changed without changing this key).
+In pre-v3.0 format, there's one more required field, and an optional field:
+
+vendor-defined string
+This is often blank, and is then specified with a blank string: ``. This field is required in pre-v3.0 format. If non-blank, it's meaning is determined by the application vendor.
+hostid
+This field is optional in pre-v3.0 format. For node-locked licenses. This differs from the hostid on the SERVER line: on the SERVER line, the FLEXlm server must be run on the specified hostid; on the FEATURE line, the USER must be on the specified hostid to use the licensed feature.
+v3.0+ format
+After the first 7 fields, the remaining fields are always of the format `name=value', and are called `name-value pairs,' for example, `HOSTID=12345678'. Name-value pairs where the name is uppercase are part of the license key, and cannot be altered. If the name is lowercase, it's not part of the key, and users are welcome to change it.
+Here's the v3.0+ name keywords for name-value pairs:
+HOSTID
+See description above.
+ck
+Used in conjunction with lmcksum to determine that the license file has been typed incorrectly.
+OVERDRAFT
+Allows a number of uses beyond the #lic field, for a more lenient licensing policy.
+DUP_GROUP
+With this field, the application can allow, for example, a user on the same node and display to have any number of uses counted as one use. Please see the manuals for further information on this.
+The following FEATURE keywords have no predefined meaning by FLEXlm - their use is defined by the application vendor.
+
+VENDOR_STRING
+vendor_info
+dist_info
+user_info
+asset_info
+ISSUER
+NOTICE
+INCREMENT
+The fields are identical to a FEATURE line, but `increments' the #lic field. This way a distributor can issue an INCREMENT line for 1 use, and then, later, another INCREMENT line for 2 uses, totaling 3 uses.
+Note that if the INCREMENT's differ by version, hostid (node-locked), they will `pool' separately in the server - that is, they'll be counted separately. Also, if vendor-defined strings are different they may or may not pool separately, depending on the vendor.
+
+UPGRADE
+Identical format to FEATURE, except there's 2 version numbers, a `from' version and a `to' version. Useful with INCREMENT lines, to upgrade a number of the existing licenses from one version to another.
+PACKAGE
+Package has 2 different purposes:
+to license a product SUITE, or
+to provide a more efficient way of distributing a license file that has a large number of features.
+Since PACKAGE lines contain no customer-specific information, they can be optionally included with the application software to further ease license distribution.
+
+Format:
+
+PACKAGE name vendor version key COMPONENTS=list [OPTIONS=SUITE]
+
+pkg-name
+If a corresponding FEATURE line has the same name, this package will be `enabled' - each feature name in `list' will become an independent FEATURE.
+vendor
+Ties in to DAEMON name.
+version
+The corresponding FEATURE line must have the same version.
+key
+20-character license key - secures the PACKAGE line.
+list
+feature names which will be some features if the packaged is `enabled'.
+SUITE
+If this is set, the PACKAGE behaves as a suite. The package name itself becomes a feature, which is checked out in parallel with each component feature.
+Q3.2 What does a demo license look like?
+Companies can implement demo licenses in unlimited ways, but there is one most common method, which will be explained. Example:
+
+FEATURE f1 demo 1.0 1-jan-1996 0 87ced98ce12a12900878 `` DEMO 
+This is a complete demo license for feature `f1'. The attributes of a standard demo license, like this one, are:
+
+It expires relatively soon.
+It's uncounted (Note the `Number of licenses' field is '0') and therefore requires no server.
+Since it is uncounted, there's no SERVER or DAEMON lines.
+The word `DEMO' at the end is a pseudo-hostid, which indicates it will run on any system.
+Normally, the software vendor will preprint these demo licenses, one set for each time period, and hand out the licenses based on the appropriate expiration date.
+
+
+Q3.3 Is there any way to steal licenses by duplicating lines, etc.?
+Following is a list of attempts to mess with license file, and the result:
+
+Duplicating FEATURE lines:
+The server only recognizes the first FEATURE line with a given feature name for a particular vendor-daemon, so copying the FEATURE line has no affect--the second line is ignored by the server. NOTE: some companies, for historical reasons, issue FEATURE lines which actually behave as INCREMENT lines; see the next example for these.)
+Duplicating INCREMENT lines:
+INCREMENT lines with identical 20-character license keys are considered duplicates, and the server ignores the duplicates. If the customer changes the 20-character license key, the line becomes invalid. If the customer has 2 INCREMENT lines with different license keys, then these were issued by the vendor, and the intent is that they both are valid.
+Customer has a FEATURE line for `foobar', and is issued another license for `foobar.' Suppose the customer puts BOTH lines in the license file?
+The server only recognizes the first FEATURE line for a given FEATURE name. If the first line in the file is the old one, the customer won't get the benefit of the new line. Conversely, if the first FEATURE is the new line, the old line is simply ignored by the server.The client applications will, however, attempt a checkout from the second line, if the first line fails. The client will get an error from the server for the attempt on the second line of NOSERVSUPP, `License server does not support this feature.' In addition, the ascii debug log produced by the server will note the duplicated FEATURE name.
+Customer has an INCREMENT line, and receives another INCREMENT line for the same feature name, and keeps both lines in the license file.
+Both lines will work. In fact, that's the intent behind INCREMENT, that the user keeps both lines, and the second increments the first.
+Copying the license file to another name, and putting both in the $LM_LICENSE_FILE path?
+This has the same effect as duplicating each line.
+Q3.4 Does FLEXlm handle dates in the year 2000 and beyond?
+Yes. The FLEXlm date format uses a 4-digit year. Dates in the 20th century (19xx) can be abbreviated to the last 2 digits of the year (xx), and use of this feature is quite widespread. Dates in the year 2000 and beyond must specify all 4 year digits. Note that the year `0' or `00' is a special case, and does not mean 1900. Rather it means that the license never expires.
+
+Table of Contents * Previous Chapter * Next Chapter

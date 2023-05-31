@@ -1,0 +1,94 @@
+Table of Contents * Previous Chapter * Next Chapter
+
+Q1. Hostids
+Q1.1 How do I get the system hostid?
+This differs by hardware platform and operating system. You can always get the hostid using the lmhostid command. However, customers that don't have access to lmhostid often need to get the hostid. Following is a chart for the most popular operating systems:
+
+Decstation/Ultrix (Ethernet)
+lmhostid arp on a different node usually works.
+DG/dgux5 (32-bit)
+/usr/sbin/systemid
+HP700 (32-bit)
+uname -i, and prefix with a '#' (but see below)
+RS-6000/AIX (32-bit)
+uname -m, remove last 2 digits, then use remaining last 8 digits; e.g.,000276513100 becomes 02765131
+SCO/Unix (v3.0+) (String)
+uname -x, then prepend with ID_STRING=
+SCO/Unix (v2.4-) (32-bit)
+uname -x, remove any leading letters, then use only next hex digits; e.g., sco3ax5 becomes 3a.
+SGI/Irix (32-bit)
+echo `/etc/sysinfo -s` and convert to hex from decimal.
+SUN (32-bit)
+hostid
+VMS (Ethernet)
+ncp
+Windows/NT (Ethernet)
+lmhostid (Windows: Supports ODI, NDIS and Packet Driver Ethernet interfaces. NT: Supports `NWLink IPX/SPX'available from NT system CD)
+Windows/NT (32-bit volume serial number)
+DIR C:\ and look for `Volume Serial Number is', and remove '-'.
+Windows/NT (32-bit Sentinel dongle available from Globetrotter)
+lmhostid -sentinel
+Q1.2 On HP700 the hostid seems to be blank. Why?
+Because obtaining the ethernet address (which is sometimes used as the hostid on hp700 systems) requires read and sometimes write permissions on `/dev/lan0'. To fix this,
+
+1) log in as root
+2) type `chmod 777 /dev/lan0'
+No, this is not a security hole. It is trivial to read TCP packets by simply connecting a notebook computer to the net. System administrators should assume these packets are readable. Therefore, changing permissions on /dev/lan0 is not a security problem.
+
+We've seen postings suggesting using setuid to get around this problem. Using setuid is a serious, real security hole; setting permissions on /dev/lan0 is not.
+
+Better yet, if you're using v3.0 or later of FLEXlm, use the uname -i hostid. This is the default hostid produced by lmhostid with v3.0 and later, primarily to get around all the problems we were seeing using ethernet address.
+
+
+Q1.3 At some HP sites lmhostid gives an ethernet hostid, and at others a uname -i hostid. Why?
+Until v3.0 of FLEXlm (1994), FLEXlm only supported ethernet hostid on hp700. As of v3.0 FLEXlm supports both ethernet and uname -i hostids - FLEXlm can automatically determine what kind of hostid is provided and validate accordingly.
+
+On hp700:
+
+lmhostid (v3.0+)
+uname -i hostid
+lmhostid -long (v3.0+)
+uname -i hostid
+lmhostid -idmodule (v3.0+)
+id-module hostid
+lmhostid (v2.4)
+ethernet hostid
+lmhostid -long (v2.4)
+id-module hostid
+lmhostid -ether (v2.2+)
+ethernet hostid
+lmhostid (v2.1)
+id-module hostid (rare, and old)
+The uname -i hostid is preferred, where possible.
+
+
+Q1.4 For some applications, the hostid on some SGI systems seems to be wrong. Why?
+This only happens when an application has been compiled on Irix 4, and is running on an Irix 5 system. Since Irix 4 is now getting old, this problem should occur less often.
+
+After Irix 5.1, SGI has two hostids available on each system, an old and a new hostid. A hostid problem arises when using FLEXlm binaries linked with Irix 4 on an Irix 5 system. The Irix 4 binaries only see the `old' hostid, whereas the Irix 5 binaries see the `new' hostid. To use FLEXlm binaries linked with Irix 4 on an Irix 5 system, the end-user will have to change his system's hostid to the `old' hostid.
+
+To fix, as root, run:
+
+# systune -i
+systune-> use_old_serialnum
+use_old_serialnum = 0
+systune-> use_old_serialnum 1
+Do you want to change this to 1? y
+systune-> quit
+#
+You will see several values printed, one of which is `use_old_serialnum'. Value is set to 0 on 5.1 by default. This should be set to 1 using systune.
+
+Example: new: 332293 old: 53336b32
+
+
+Q1.5 On NT, I'm getting a 0 hostid (or FFFFFFFF)--how do I fix this?
+The `NWLink IPX/SPX' network driver must be installed. To do this:
+
+Put the NT system disk in the CDROM drive.
+Select `Main'
+Select `Control Panel'
+Select `Network'
+Select `Add'
+And add the NWLink IPX SPX driver.
+
+Table of Contents * Previous Chapter * Next Chapter

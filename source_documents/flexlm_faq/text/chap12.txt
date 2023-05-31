@@ -1,0 +1,33 @@
+. 
+Table of Contents * Previous Chapter
+
+Q12. WINDOWS/PC Related Questions
+Q12.1 What is the Latest Version of PC Drivers?
+The latest version is 4.1b which will be available by CD in January, or by special request. The version prior to that was Patch Release 6. These versions support Windows 95 as well as the other PC related platforms and incorporates several bug fixes.
+
+
+Q12.2 What Platforms does the PC Run on?
+Flex LM supports the following platforms:
+
+Windows 3.11
+Windows for Workgroup 3.11
+Windows 95
+Windows NT 3.5 and 3.51
+Mips NT 3.51
+Alpha NT 3.51
+Netware 3.12 and 4.X
+Networking is required on all 32 bit versions
+
+
+Q12.3 What is WINSOCKX.DLL
+Winsockx.dll is a dll provided by Globetrotter that is used by 16 bit applications to interface between Flexlm and other networking software provided by networking ISV's. It allows nodelocked applications to not require networking software. It also interfaces between winsock.dll for TCP/IP, and the Novell dll's that provide IPX/SPX on 16 bit operating systems.
+
+
+Q12.4 Why do I need to include NWlink IPX/SPX on NT and Win 95?
+This is necessary for either obtaining the Ethernet card address, or to provide connectivity with a Netware License server
+
+
+Q12.5 Will the Server run on Windows 95?
+Since patch release 6, it is possible to run the Flexlm Server (LMGRD.exe and vendor.exe) in a window. This is not as good of a solution as a NT where it can be run as a service. Further testing will be undertaken to verify its operation, but there is no reason not to test the server on a Windows 95 system.
+
+Table of Contents * Previous Chapter

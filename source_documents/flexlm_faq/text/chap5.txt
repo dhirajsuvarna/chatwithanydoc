@@ -1,0 +1,117 @@
+Table of Contents * Previous Chapter * Next Chapter
+
+Q5. Using FLEXlm
+Q5.1 How do I install a FLEXlm license file?
+The simplest thing to do is put the license file where the vendor suggests putting it. If you've received the file via e-mail, you can use the email message itself as the license file, since all lines not beginning with FLEXlm keywords are considered comments.
+
+The sure-fire place to put a license file is in the default location: /usr/local/flexlm/licenses/license.dat.
+
+Normally, the only things you can change in a license file are
+
+The hostname (not the hostid!).
+The port number on the SERVER line. This number may already be in use (lmgrd will report `Address In Use' if the port is in use).
+The path to the vendor daemon executable on the DAEMON line.
+FEATURE lines in the new (v3.0+) format sometimes have name=value pairs, which can be changed IF the 'name=' is lowercase.
+
+
+Q5.2 How do I start the FLEXlm license server?
+On Unix:
+
+We strongly recommend that lmgrd not be run as root, since any process run by root is a potential OS security risk.
+
+% lmgrd -c `path-to-license-file' -l logfile &
+If you run lmgrd from a boot startup script, you can run it as a regular user using the su command:
+
+su username -c `umask 022; /path/lmgrd -c /path/license.dat -l /path/log'
+Where
+username
+is a non-privileged user
+path
+correct path to lmgrd, license.dat and log file
+Note that as of v4, lmgrd automatically runs in the background on Unix.
+
+On NT:
+
+You can start lmgrd in a DOS window, but you MUST add -app to the command line:
+
+% lmgrd -app -c `path-to-license-file' -l logfile &
+If you don't add -app, it will hang for 20 seconds, and then exit, with no error message.
+
+To start as an NT service, run the install program off the distribution CD, and start from the Services Control Panel.
+
+
+Q5.3 I'm having trouble starting the license server in the Unix system bootup files. How can I get this to work?
+For reasons unknown some /etc/rc (/etc/rc2.d, /sbin/rc2.d, etc.) files refuse to run lmgrd with the simple command listed above. There are 2 workarounds we know to work - either or both should fix the problem:
+
+Use 'nohup su username -c `umask 022; lmgrd -c ...''. (It's not recommended to run lmgrd as root; the su username is used to run lmgrd as a non-privileged user.)
+Add 'sleep 2' after the lmgrd command.
+Finally, on RS-6000 systems, you have to use /etc/inittab to start the license server. The reason is that AIX has not started TCP networking when /etc/rc is run, and lmgrd requires TCP networking.
+
+
+Q5.4 My server refuses to start. I get the message `No licenses to serve'.
+That's because the license file has only `uncounted' licenses, and these don't require a server. Uncounted licenses have a '0' in the `number-of-licenses' field on the FEATURE line.
+
+Note that in v5, uncounted licenses will also be supported, so long as the client application uses port@host or USE_SERVER.
+
+
+Q5.5 Does FLEXlm work across the internet?
+Yes. A server on the internet will serve licenses to anyone else on the internet. This can be limited with the INTERNET= attribute on the FEATURE line, which limits access to a range of internet addresses. You can also use the INCLUDE and EXCLUDE options in the daemon option file to allow (or deny) access to clients running on a range of internet addresses.
+
+
+Q5.6 Does FLEXlm work with Internet firewalls?
+Many firewalls require that port numbers be specified to the firewall. FLEXlm v5 lmgrd supports this.
+
+
+Q5.7 If my client dies, does the server free the license?
+Yes, unless the client's whole system crashes. Assuming communications is TCP, the license is automatically freed immediately. If communications are UDP, then the license is freed after the UDP timeout, which is set by each vendor, but defaults to 45 minutes. UDP communications is normally only set by the end-user, so TCP should be assumed. If the whole system crashes, then the license is not freed, and you should use lmremove to free the license.
+
+If the whole system running the client application shuts down before the license is checked in, the license will NOT be freed automatically. (This is most common on a PC.) To free the license, use lmremove (or lmutil lmremove).
+
+
+Q5.8 What happens when the license server dies?
+FLEXlm applications send periodic heartbeats to the server to discover if it has died. What happens when the server dies is then up to the application. Some will simply continue periodically attempting to re-checkout the license when the server comes back up. Some will attempt to re-checkout a license a few times, and then, presumably with some warning, exit. Some GUI applications will present pop-ups to the user periodically letting them know the server is down and needs to be re-started.
+
+
+Q5.9 I'm getting the error `encryption code in license file is inconsistent'. What does this mean?
+The license file was typed in incorrectly, or it was changed by the user. Use the 'lmcksum' utility to verify the license file. For v4.0+, if the file has 'ck=nnn', lmcksum will report simply OK or BAD for each line. Otherwise, you'll have to compare the numbers lmcksum reports with a good file, presumably run by your application's vendor.
+
+If the file was good, and then fails with this error on a new release from your software vendor, it means that they've changed their license key seed, and you'll require a new license file.
+
+
+Q5.10 How do you tell if a port is already in use?
+99.44% of the time, if it's in use, it's because lmgrd is already running on the port - or was recently killed, and the port isn't freed yet. Assuming this is not the case, then use 'telnet host port' - if it says `can't connect', it's a free port.
+
+
+Q5.11 How do you start lmgrd on NT?
+There's two methods - install it as a service, or type the command in a DOS window. For a DOS window, assuming the license file is in the default location (C:\FLEXLM\LICENSE.DAT), use
+
+D:\FLEXLM> lmgrd -app -l logfile
+Note that -app MUST be there, and it must be lowercase. If it's not there, or it's typed uppercase, it will hang for 10 seconds, and then the DOS prompt will return. To install as a service, use the INSTALL.EXE command provided by FLEXlm. For example:
+
+D:\FLEXLM> install d:\flexlm\lmgrd.exe 
+Note that the full pathname to lmgrd.exe must follow the install command, and you must make sure that the full path name, including drive letter, for your vendor daemon is specified in the license file, C:\FLEXLM\LICENSE.DAT. Finally, as usual, lmgr32.dll must be in the system's DLL search path. As a service, lmgrd is started when the system is booted. The log file is located in SYSTEM32\LMGRD.LOG.
+
+
+Q5.12 On Solaris 2.4, why does it take 4 minutes to restart lmgrd?
+This is a tunable parameter on the Solaris OS, we suggest changing it so the port is freed in 2 seconds rather than 4 minutes. To change the setting, as root:
+
+ndd /dev/tcp -set tcp_close_wait_interval <interval>
+where interval is in milliseconds. The default is 240000 (4 minutes). We recommend a setting > 2000.
+
+
+Q5.13 Does FLEXlm require root permissions?
+No. There is no part of FLEXlm, lmgrd, vendor daemon or application, that requires root permissions. In fact, it is strongly recommended that you do not run the license server (lmgrd) as root, since root processes can introduce security risks. If lmgrd must be started from the root user (for example, in a system boot script), we recommend that you use the su command to run lmgrd as a non-privileged user:
+
+su username -c "/path/lmgrd -c /path/license.dat -l /path/log"
+where username is a non-privileged user, and path is the correct paths to lmgrd, license.dat and debug log file. You will have to ensure that the vendor daemons listed in /path-to-license/license.dat have execute permissions for username. The paths to all the vendor daemons in the license file are listed on each DAEMON line.
+
+
+Q5.14 Is it ok to run lmgrd as `root' (Unix only)?
+It is not prudent to run any command, particularly a daemon, as root on Unix, as it may pose a security risk to the Operating System. Therefore, we recommend that lmgrd be run as a non-privileged user (not `root'). If you are starting lmgrd from a boot script, we recommend that
+
+you use
+
+su username -c "umask 022; command"
+to run lmgrd as a non-privileged user.
+
+Table of Contents * Previous Chapter * Next Chapter

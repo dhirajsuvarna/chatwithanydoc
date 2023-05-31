@@ -1,0 +1,101 @@
+Table of Contents * Previous Chapter * Next Chapter
+
+Q4. FLEXlm Versions
+Q4.1 I have products from several companies at various FLEXlm version levels. Do I have to worry about how these versions work together?
+If you're not combining license files from different vendors, the simplest thing to do is make sure you use the tools (especially lmgrd) that are shipped by each vendor.
+
+lmgrd will always correctly support older versions of vendor daemons and applications, so it's ALWAYS safe to use the latest version of lmgrd. If you've combined license files from 2 vendors, you MUST use the latest version of lmgrd.
+
+If you've received 2 versions of a product from the same vendor, you MUST use the latest vendor daemon they send you. An older vendor daemon with a newer client will cause communication errors.
+
+Please ignore letters appended to FLEXlm versions, i.e., v2.4d. The appended letter indicates a patch, and does NOT indicate any compatibility differences. In particular, some elements of FLEXlm didn't require certain patches, so a 2.4 lmgrd can work successfully with a 2.4b vendor daemon.
+
+
+Q4.2 I've received a new copy of a product from a vendor, and it uses a new version of FLEXlm. Is my old license file still valid?
+Yes. Older FLEXlm license files are always valid with newer versions of FLEXlm.
+
+
+Q4.3 I've received a new license file, and the format is different from the old one I had from the same vendor? Why? Are they compatible?
+As of v3.0, FLEXlm has an optional new format for license files, which is explained fully in Q3.1. FLEXlm products always understand older versions; therefore, the pre-v3.0 files are understood by every FLEXlm version. However, your old applications (pre-FLEXlm v3.0) will not be able to use the new license file.
+
+
+Q4.4 How do versions of FLEXlm differ?
+This is a short, incomplete summary of the features introduced with each FLEXlm version. Each version had minor security, convenience and reliability enhancements, which are not listed.
+
+v1.0 1988, First FLEXlm Release
+
+v1.5 February, 1990, First widely-used version, containing all the basic FLEXlm features, including:
+
+Basic license file format
+Floating and node-locked licenses
+lmgrd and vendor daemons
+TCP/IP communications
+DEMO, expiring licenses
+Basic end-user utility set, including lmdown, lmhostid, lmremove, lmstat, lmver
+lmgrd log file
+LM_LICENSE_FILE to locate license file
+End-User Options file to control daemon behavior, including RESERVE and TIMEOUT, etc.
+License Queueing.
+Redundant Servers
+v2.1 March, 1991
+
+Improved TIMEOUT support
+Improved ethernet hostid support
+More customizable by vendor
+v2.21 November 1991
+
+Added support for many platforms, and some platform- specific improvements, such as hostid.
+Hostid ANY added
+v2.26 March 1992 - Released only to Sun
+
+Added license lingering
+Other bug fixes and minor enhancements
+v2.4 December 1992 - Currently (Summer 1995) the most commonly used version.
+
+Added `use-all-feature-lines' capability for incremental license distribution.
+Enhanced vendor customization routines.
+Enhanced End-User Options file.
+Added new hostid types: USER, HOSTNAME and DISPLAY
+Added `port@host' to LM_LICENSE_FILE capability - down-loads license file from server.
+v2.61 March 1993 - Released only to Sun
+
+Added INCREMENT and UPGRADE lines to license file
+v3.0 May 1994
+
+INCREMENT and UPGRADE behavior changed and improved
+Added UDP protocol support.
+Added 'uname -i' hostid for hp.
+Added 'multiple jobs,' for enhanced support of LM_LICENSE_FILE as a colon-separated list.
+New, optional license file format, with `name=value' syntax for optional new features, including: asset_info, ISSUER, and NOTICE, '\' license file continuation character, 2048 character limit per feature
+v4.0 December 1994
+
+Removed use of floating point, for enhanced reliability
+FEATURE line additions: ck (for use with lmcksum), OVERDRAFT, DUP_GROUP, INTERNET hostid
+PACKAGE line
+License Finder
+lmdiag for end-user diagnostics
+v4.1May 1995
+
+Same features as v4.0, with bug fixes and new platform support
+v4.1 Patch Release 6, October 1995
+
+PC patch release for Windows 95 and various bug fixes.
+v4.1b January 1996
+
+Bug fixes.
+v5.0 March 1996
+
+Improved port@host behavior - client application doesn't read license file.
+Automatic port@host via USE_SERVER line in license file.
+Hostid lists - lock a feature to several hostids.
+Improved firewall support. (Available upon request now)
+New FEATURE attributes: SN (serial number), USER_BASED, HOST_BASED, MINIMUM, SUPERSEDE, ISSUED (issued date), CAPACITY (charging based on system capacity).
+Optional avoidance of NIS and DNS via IP address instead of hostname.
+Improved REPORTLOG format
+Server, upon startup, notifies of licenses that will expire within 2 weeks.
+Improved end-user options file functionality.
+New FEATURE attributes: SUPERSEDE, ISSUED, USER_BASED, HOST_BASED, SN.
+v5.0a June 1996
+
+Bug fixes.
+Table of Contents * Previous Chapter * Next Chapter

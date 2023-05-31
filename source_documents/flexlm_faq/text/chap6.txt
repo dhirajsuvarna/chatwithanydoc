@@ -1,0 +1,76 @@
+Table of Contents * Previous Chapter * Next Chapter
+
+Q6. How FLEXlm Works.
+Q6.1 What prevents me from changing a license file?
+Each feature line in the license file has a 20-character hex `license-key'. If anything significant is changed, the key becomes invalid, the license won't work, and you'll get the message listed in Q5.8.
+
+
+Q6.2 What goes into a license-key?
+The vendor's ENCRYPTION_CODE_1 and ENCRYPTION_CODE_2. These are 2 32-bit numbers that the vendor makes up. Naturally, these are kept secret by the vendor.
+For counted features, the hostid on the SERVER line.
+Everything else on FEATURE/INCREMENT/UPGRADE/PACKAGE lines, EXCEPT `name=value' pairs, where the name is lowercase.
+Q6.3 How hard is it to guess a license-key?
+There's two approaches to this: guess the license-key, or guess the ENCRYPTION_CODEs. Both of these are roughly equal in difficulty, and involve guessing 2 32-bit numbers.
+
+Assume you can guess, and test, 4 billion numbers (one of the 32-bit numbers) per minute. (This is an extremely optimistic estimate, but useful for conjecture). It will then take 4 billion minutes to guess all possible numbers. On average, you'd hit the right number halfway through, so, assume 2 billion minutes. Let's see, there's 1440 minutes per day, roughly 525600 minutes per year, 525.6 million minutes per century. OK, it will take a while. In reality, testing ONE license-key, particularly for interactive applications, can take a minute or more.
+
+
+Q6.4 So, does that mean that FLEXlm is unbreakable.
+No. Partly this depends on the policy of the applications. However, GLOBEtrotter does not claim that FLEXlm is tamper-proof.
+
+
+Q6.5 How fast does a checkout occur?
+This depends, naturally, on the OS and the system/network load. Our tests show that a typical sun sparcstation 2 performs checkouts in approximately 1/10 second (100 ms.).
+
+If the license is `uncounted' the checkout is performed in approximately 1/100 second (10 ms.), or faster.
+
+
+Q6.6 Does FLEXlm licensing impose a heavy load on the network.
+No, but partly this depends on the application, and end-user's use. A typical checkout request requires 5 messages and responses between client and server, and each message is < 150 bytes.
+
+When a server is not receiving requests, it requires virtually no CPU time.
+
+When an application, or lmstat, requests the list of current users, this can significantly increase the amount of networking FLEXlm uses, depending on the number of current users.
+
+Also, prior to FLEXlm v5, use of `port@host' can increase network load, since the license file is down-loaded from the server to the client. port@host should be, if possible, limited to small license files (say < 50 features). In v5, port@host actually improves performance.
+
+
+Q6.7 Does FLEXlm work with NFS?
+Yes. FLEXlm has no direct interaction with NFS. FLEXlm uses an NFS-mounted file like any other application.
+
+
+Q6.8 Does FLEXlm work with ATM, ISDN, Token-Ring, etc.
+In general, these have no impact on FLEXlm. FLEXlm requires TCP/IP or SPX (Novell Netware). So long as TCP/IP works, FLEXlm will work.
+
+
+Q6.9 Does FLEXlm work with subnets, fully-qualified names, multiple domains, etc.?
+Yes, although this behavior has been improved in v3.0.
+
+When a license server and a client are located in different domains, fully-qualified host names have to be used. A `fully-qualified hostname' is of the form: node.domain.xxx, where `node' is the local hostname (usually returned by the 'hostname' command or 'uname -n') `domain.xxx' is the internet domain name, and `xxx' is `com' or `edu' or `org', etc.
+
+To ensure success with FLEXlm across domains, do the following:
+
+Make the sure the fully-qualified hostname is the name on the SERVER line of the license file
+Make sure ALL client nodes, as well as the server node, are able to 'telnet' to that fully-qualified hostname. For example, if the host is locally called `speedy', and the domain name is `corp.com', local systems will be able to logon to speedy via 'telnet speedy'. But very often, 'telnet speedy.corp.com' will fail, locally. Note that this telnet command will always succeed on hosts in other domains (assuming everything is configured correctly), since the network will resolve speedy.corp.com automatically.
+Finally, there must be an `alias' for speedy so it's also known locally as speedy.corp.com. This alias is added to the /etc/hosts file, or if NIS/Yellow Pages are being used, then it will have to be added to the NIS database. This requirement goes away in version 3.0 of FLEXlm.
+Q6.10 Does FLEXlm work with NIS and DNS?
+Yes. However, some sites have broken NIS or DNS, which will cause FLEXlm to fail. In v5 of FLEXlm, NIS and DNS can be avoided to solve this problem. In particular, sometimes DNS is configured for a server that's not current available (e.g., a dial-up connection from a PC). Again, if DNS is configured, but the server is not available, FLEXlm will fail.
+
+In addition, some systems, particularly Sun, SGI, HP, require that applications be linked dynamically to support NIS or DNS. If a vendor links statically, this can cause the application to fail at a site that uses NIS or DNS. In these situations, the vendor will have to relink, or recompile with v5 FLEXlm (when it becomes available in Q1 of 96). Vendors are strongly encouraged to use dynamic libraries for libc and networking libraries, since this tends to improve quality in general, as well as making NIS/DNS work.
+
+On PCs, if a checkout seems to take 3 minutes and then fails, this is usually because the system is configured for a dial-up DNS server which is not currently available. The solution here is to turn off DNS.
+
+Finally, hostnames must NOT have periods in the name. These are not legal hostnames, although PCs will allow you to enter them, and they will not work with DNS.
+
+
+Q6.11 Is the FLEXlm `display' the same as an X-Display?
+Not by default. The default FLEXlm display is what is returned by the ttyname() function call (or the 'tty' command), and is usually something like `/dev/ttyp4'. However, the application developer can change this default to the X-Display. A paper is available on this topic to FLEXlm developers from Globetrotter Software.
+
+
+Q6.12 We're using FLEXlm over a wide-area network. What can we do to improve performance?
+The network should have a reasonably good up-time record. Otherwise, client applications will be both unable to obtain licenses, and will lose licenses that have already been checked out.
+Wide-area support should probably be avoided when the volume is particularly high, say more than one checkout per second. This volume is fine for a local server, but may exceed the reliability of wide-area networks.
+FLEXlm network traffic should be minimized. With the most common uses of FLEXlm, traffic is negligible. In particular, checkout, checkin and heartbeats (lm_timer()) use very little networking traffic. There are two items, however, which can send considerably more data and should be avoided or used sparingly:
+`lmstat -a' should be used sparingly. lmstat -a should not be used more than, say, once every 15 minutes, and should be particularly avoided when there's a lot of features, or concurrent users, and therefore a lot of data to transmit; say, more than 20 concurrent users or features.
+prior to FLEXlm v5, the `port@host' mode of the LM_LICENSE_FILE environment variable should be avoided, especially when the license file has a lot of features, or there are a lot of license files included in $LM_LICENSE_FILE. The license file information is sent via the network, and can place a heavy load. Failures due to `port@host' will generate the lm_errno LM_SERVNOREADLIC (-61).
+Table of Contents * Previous Chapter * Next Chapter
