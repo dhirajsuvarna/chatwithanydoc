@@ -13,23 +13,27 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA, ConversationalRetrievalChain, LLMChain
 from streamlit_chat import message
 from langchain.memory import ConversationBufferMemory
+from langchain.prompts import PromptTemplate
 
 load_dotenv()
 
-# MODEL_PATH = r"D:\gpt4all\models\guanaco-7B.ggmlv3.q4_1.bin"
-# MODEL_N_CTX=2000
-# EMBEDDINGS_MODEL_NAME="all-MiniLM-L6-v2"
-# PERSIST_DIRECTORY= "vectorstore_db"
-# TARGET_SOURCE_CHUNKS = 2
+prompt_template = """
+    You are a Product Label Analyzer in Medical Domain.
+    You need to check if the text contained in the Product Label meets the Regulatory Standards.
+    Following is the text of the Product Label - 
+
+    {product_label_text}
+
+    Answer the question based on the above product label - 
+
+    {question}
+"""
 
 llm_model_path = os.environ.get('LLM_MODEL_PATH')
 embedding_model = os.environ.get('EMBEDDINGS_MODEL_NAME')
 persist_dir = os.environ.get('PERSIST_DIRECTORY')
 model_n_ctx = os.environ.get('MODEL_N_CTX')
 retrieval_doc_num = os.environ.get('RETRIEVAL_DOC_NUM')
-
-
-
 
 @st.cache_resource
 def load_llm(iModelPath):
@@ -85,30 +89,39 @@ def get_conversational_chain(iLLM):
     return qa
 
 
+def get_chain(iLLM):
+    string_prompt = PromptTemplate.from_template(prompt_template)
+    chain = LLMChain(llm=iLLM, prompt=string_prompt, verbose=True)
+    return chain
+
+
+
+
 st.title("Chat with PDF")
 uploaded_file = st.file_uploader("upload file")
 
 if uploaded_file:
     with fitz.open(stream= uploaded_file.read(), filetype='pdf') as doc:
         allText = ""
-        for page in doc:
-            allText += page.get_text("text")
+        if len(doc) > 0:
+            allText = doc[0].get_text("text")
 
     with st.expander("Text Extracted from PDF"):
         st.info(allText)
 
-    with st.spinner("Embedding the Docs"):
-        fileName = uploaded_file.name
-        if not are_embeddings_present(fileName):
-            # Generate Embeddings and Store it 
-            print(f"Generating New Embeddings")
-            chunks = generate_docs(allText)
-            generate_vectorstore(chunks, fileName)
+    # with st.spinner("Embedding the Docs"):
+    #     fileName = uploaded_file.name
+    #     if not are_embeddings_present(fileName):
+    #         # Generate Embeddings and Store it 
+    #         print(f"Generating New Embeddings")
+    #         chunks = generate_docs(allText)
+    #         generate_vectorstore(chunks, fileName)
 
     with st.spinner("Loading the LLM"):
         llm = load_llm(llm_model_path)
+        chain = get_chain(llm)
         # qaChain = get_qa_chain(llm)
-        qaChain = get_conversational_chain(llm)
+        # qaChain = get_conversational_chain(llm)
         # qaChain.combine_documents_chain.verbose = True
         # qaChain.combine_documents_chain.llm_chain.verbose = True 
         # qaChain.combine_documents_chain.llm_chain.llm.verbose = True
@@ -132,10 +145,12 @@ if uploaded_file:
             # for doc in response['source_documents']:
             #     st.markdown(f"### {doc.metadata['filename']}")
             #     st.info(doc.page_content)
-            response = qaChain({"question": query})
+            # response = qaChain({"question": query})
+            response = chain.run({'product_label_text': allText, 'question': query})
 
             st.session_state["past"].append(query)
-            st.session_state["generated"].append(response['answer'])
+            # st.session_state["generated"].append(response['answer'])
+            st.session_state["generated"].append(response)
 
             if st.session_state["generated"]:
 
@@ -143,8 +158,8 @@ if uploaded_file:
                 message(st.session_state["generated"][i], key=str(i))
                 message(st.session_state["past"][i], is_user=True, key=str(i) + "_user")
 
-            for doc in response['source_documents']:
-                st.markdown(f"### {doc.metadata['filename']}")
-                st.info(doc.page_content)
+            # for doc in response['source_documents']:
+            #     st.markdown(f"### {doc.metadata['filename']}")
+            #     st.info(doc.page_content)
 
             
