@@ -2,7 +2,7 @@
 
 This application is a chat bot to chat about any medecines. 
 
-![You Your Medicine](./fern/assets/know_your_meds.png)
+![Know Your Medicine](./fern/docs/assets/know_your_meds.png)
 
 Some sample questions you can ask it are 
 
